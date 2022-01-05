@@ -3,7 +3,7 @@
 set -e
 
 # Install
-apt install neovim
+apt-get install -y neovim
 
 # Use nvim as vim and vi
 cat << EOF >> ~/.zshrc
@@ -16,7 +16,9 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # Add vim config
-cat << EOF >> ~/.config/nvim/init.vim
+mkdir -p ~/.config/nvim/
+
+cat << VIM_CONFIG_END >> ~/.config/nvim/init.vim
 set nocompatible
 
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
@@ -31,8 +33,7 @@ call plug#begin('~/.vim/plugged')
   " (The latter must be installed before it can be used.)
   Plug 'google/vim-maktaba'
   Plug 'google/vim-codefmt'
-  " Also add Glaive, which is used to configure codefmt's maktaba flags. See
-  " `:help :Glaive` for usage.
+  " Also add Glaive, which is used to configure codefmt's maktaba flags.
   Plug 'google/vim-glaive'
 
   " A rudimentary Bazel filetype plugin
@@ -99,7 +100,7 @@ augroup autoformat_settings
   autocmd FileType vue AutoFormatBuffer prettier
 augroup END
 
-EOF
+VIM_CONFIG_END
 
-# Config coc
-curl -sL install-node.vercel.app/lts | bash
+# Install coc
+# curl -sL install-node.vercel.app/lts | bash

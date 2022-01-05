@@ -35,12 +35,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     gcovr \                                                                         
     bc
 
-RUN bash -x docker/installs/install_zsh.sh
+COPY installers docker/installers
+
+RUN bash -x docker/installers/install_zsh.sh
 
 # Should install zsh before vim
-RUN bash -x docker/installs/install_vim.sh
+RUN bash -x docker/installers/install_vim.sh
 
-RUN bash -x docker/installs/install_tmux.sh
+RUN bash -x docker/installers/install_tmux.sh
 
 # Install bazelisk
 ENV BAZELISK_VERSION v1.11.0

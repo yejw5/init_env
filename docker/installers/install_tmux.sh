@@ -1,6 +1,8 @@
 #!/bin/bash
 
-echo << EOF >> ~/.tmux.conf
+apt-get install -y tmux
+
+echo << TMUX_CONFIG_END >> ~/.tmux.conf
 # set prefix key to ctrl+a unTil I have time to adapt
 unbind C-b
 set -g prefix C-a
@@ -114,4 +116,4 @@ bind c new-window -c "#{pane_current_path}"
 
 # refer to: https://github.com/neovim/neovim/issues/2035
 set -sg escape-time 0
-EOF
+TMUX_CONFIG_END
