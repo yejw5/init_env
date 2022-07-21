@@ -2,7 +2,7 @@
 
 apt-get install -y tmux
 
-echo << TMUX_CONFIG_END >> ~/.tmux.conf
+cat << TMUX_CONFIG_END >> ~/.tmux.conf
 # set prefix key to ctrl+a unTil I have time to adapt
 unbind C-b
 set -g prefix C-a

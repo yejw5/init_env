@@ -3,10 +3,33 @@
 set -e
 
 # Install
-apt-get install -y neovim
+
+apt-get install -y \
+  libtool \
+  libtool-bin \
+  autoconf \
+  automake \
+  cmake \
+  libncurses5-dev \
+  pkg-config \
+  unzip \
+  gettext
+
+echo $PWD
+
+NVIM_VERSION=0.6.1
+wget https://github.com/neovim/neovim/archive/refs/tags/v${NVIM_VERSION}.tar.gz && \
+  tar xf v${NVIM_VERSION}.tar.gz && cd neovim-${NVIM_VERSION} && \
+  make -j 10 && make install && cd .. && \
+  rm -rf v${NVIM_VERSION}.tar.gz neovim-${NVIM_VERSION}
 
 # Use nvim as vim and vi
 cat << EOF >> ~/.zshrc
+alias vim="nvim"
+alias vi="vim"
+EOF
+
+cat << EOF >> ~/.bashrc
 alias vim="nvim"
 alias vi="vim"
 EOF
@@ -43,7 +66,7 @@ call plug#begin('~/.vim/plugged')
 
   " https://github.com/neoclide/coc.nvim
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
+  " Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
 
   " if has('nvim')
   "   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -102,5 +125,19 @@ augroup END
 
 VIM_CONFIG_END
 
-# Install coc
-# curl -sL install-node.vercel.app/lts | bash
+# Install coc.nvim
+curl -sL install-node.now.sh | bash -s -- --yes
+curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+
+cat << EOF >> ~/.zshrc
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+EOF
+
+cat << EOF >> ~/.bashrc
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+EOF
+
+git clone https://github.com/neoclide/coc.nvim.git ~/.vim/plugged/coc.nvim -b master --depth 1
+cd ~/.vim/plugged/coc.nvim
+yarn install && yarn build
