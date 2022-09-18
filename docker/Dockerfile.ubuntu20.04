@@ -42,28 +42,92 @@ RUN pip3 config --user set global.trusted-host mirrors.aliyun.com
 
 RUN pip3 install clang-format==9.0.0
 
-######################
-# Install from scripts
-######################
-COPY installers docker/installers
+#######################
+# Install zsh
+#######################
+RUN apt-get install -y zsh
 
-RUN bash -x docker/installers/install_zsh.sh
+## Install oh-my-zsh
+RUN sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
 
-# Should install zsh before vim
-RUN bash -x docker/installers/install_vim.sh
+## Install zsh-autosuggestions
+RUN git clone https://github.com/zsh-users/zsh-autosuggestions.git \
+    /root/.zsh/zsh-autosuggestions
+RUN echo "source /root/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" >> /root/.zshrc
 
-RUN bash -x docker/installers/install_tmux.sh
+#######################
+# Install nvim
+#######################
+RUN apt-get install -y \
+    libtool \
+    libtool-bin \
+    autoconf \
+    automake \
+    cmake \
+    libncurses5-dev \
+    pkg-config \
+    unzip \
+    gettext
 
-# Install and set up Bazelisk
-RUN bash -x docker/installers/install_bazelisk.sh
-# Running bazel inside a `docker build` command causes trouble, cf:
-#   https://github.com/bazelbuild/bazel/issues/134
+ENV NVIM_VERSION 0.6.1
+RUN wget https://github.com/neovim/neovim/archive/refs/tags/v${NVIM_VERSION}.tar.gz && \
+    tar xf v${NVIM_VERSION}.tar.gz && cd neovim-${NVIM_VERSION} && \
+    make -j 10 && make install && cd .. && \
+    rm -rf v${NVIM_VERSION}.tar.gz neovim-${NVIM_VERSION}
+RUN ln -s $(which nvim) /usr/bin/vim
+RUN ln -s $(which nvim) /usr/bin/vi
+
+## Install Plug
+RUN curl -fLo /root/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+## Add vim config
+RUN mkdir -p /root/.config/nvim/
+COPY config/init.vim /root/.config/nvim/init.vim
+
+## Install coc.nvim
+ENV NODEJS_VERSION v16.17.0
+RUN wget https://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION-linux-x64.tar.xz && \
+    mkdir -p /usr/local/lib/nodejs && \
+    tar -xJvf node-$NODEJS_VERSION-linux-x64.tar.xz -C /usr/local/lib/nodejs && \
+    rm -rf node-$NODEJS_VERSION-linux-x64.tar.xz
+ENV PATH "/usr/local/lib/nodejs/node-$NODEJS_VERSION-linux-x64/bin:$PATH"
+
+RUN curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
+ENV PATH "/root/.yarn/bin:/root/.config/yarn/global/node_modules/.bin:$PATH"
+
+RUN git clone https://github.com/neoclide/coc.nvim.git /root/.vim/plugged/coc.nvim -b master --depth 1 && \
+    cd /root/.vim/plugged/coc.nvim
+RUN cd /root/.vim/plugged/coc.nvim/ && yarn install && yarn build && cd -
+
+#######################
+# Install from tmux
+#######################
+RUN apt-get install -y tmux
+COPY config/.tmux.conf /root/.tmux.conf
+
+#######################
+# Install from bazelisk
+#######################
+## Install packages
+RUN apt-get install --no-install-recommends -y \
+  openjdk-8-jdk \
+  openjdk-8-jre-headless
+
+ENV BAZELISK_VERSION v1.12.0
+ENV BAZELISK_INSTALL_DIR /opt/bazelisk
+RUN wget -c https://github.com/bazelbuild/bazelisk/releases/download/$BAZELISK_VERSION/bazelisk-linux-amd64 && \
+    chmod +x bazelisk-linux-amd64 && \
+    mkdir -p $BAZELISK_INSTALL_DIR && \
+    mv bazelisk-linux-amd64 $BAZELISK_INSTALL_DIR && \
+    ln -s $BAZELISK_INSTALL_DIR/bazelisk-linux-amd64 $BAZELISK_INSTALL_DIR/bazelisk
+
+## Running bazel inside a `docker build` command causes trouble, cf:
+##   https://github.com/bazelbuild/bazel/issues/134
 # The easiest solution is to set up a bazelrc file forcing --batch.
 RUN echo "startup --batch" >> /etc/bazel.bazelrc
-# Similarly, we need to workaround sandboxing issues:
-#   https://github.com/bazelbuild/bazel/issues/418
+## Similarly, we need to workaround sandboxing issues:
+##   https://github.com/bazelbuild/bazel/issues/418
 RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" \
       >> /etc/bazel.bazelrc
-ENV PATH="/opt/bazelisk:${PATH}"
-
-
+ENV PATH "/opt/bazelisk:${PATH}"
