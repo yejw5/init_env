@@ -59,46 +59,14 @@ RUN echo "source /root/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" >> /roo
 # Install nvim
 #######################
 RUN apt-get install -y \
-    libtool \
-    libtool-bin \
-    autoconf \
-    automake \
-    cmake \
-    libncurses5-dev \
-    pkg-config \
-    unzip \
-    gettext
-
-ENV NVIM_VERSION 0.6.1
-RUN wget https://github.com/neovim/neovim/archive/refs/tags/v${NVIM_VERSION}.tar.gz && \
-    tar xf v${NVIM_VERSION}.tar.gz && cd neovim-${NVIM_VERSION} && \
-    make -j 10 && make install && cd .. && \
-    rm -rf v${NVIM_VERSION}.tar.gz neovim-${NVIM_VERSION}
-RUN ln -s $(which nvim) /usr/bin/vim
-RUN ln -s $(which nvim) /usr/bin/vi
+    vim
 
 ## Install Plug
 RUN curl -fLo /root/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 ## Add vim config
-RUN mkdir -p /root/.config/nvim/
-COPY config/init.vim /root/.config/nvim/init.vim
-
-## Install coc.nvim
-ENV NODEJS_VERSION v16.17.0
-RUN wget https://nodejs.org/dist/$NODEJS_VERSION/node-$NODEJS_VERSION-linux-x64.tar.xz && \
-    mkdir -p /usr/local/lib/nodejs && \
-    tar -xJvf node-$NODEJS_VERSION-linux-x64.tar.xz -C /usr/local/lib/nodejs && \
-    rm -rf node-$NODEJS_VERSION-linux-x64.tar.xz
-ENV PATH "/usr/local/lib/nodejs/node-$NODEJS_VERSION-linux-x64/bin:$PATH"
-
-RUN curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
-ENV PATH "/root/.yarn/bin:/root/.config/yarn/global/node_modules/.bin:$PATH"
-
-RUN git clone https://github.com/neoclide/coc.nvim.git /root/.vim/plugged/coc.nvim -b master --depth 1 && \
-    cd /root/.vim/plugged/coc.nvim
-RUN cd /root/.vim/plugged/coc.nvim/ && yarn install && yarn build && cd -
+COPY config/init.vim /root/.vimrc
 
 #######################
 # Install from tmux
