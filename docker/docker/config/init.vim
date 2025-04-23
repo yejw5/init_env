@@ -21,17 +21,7 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'rhysd/vim-clang-format'
 
-  " https://github.com/neoclide/coc.nvim
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
-
-  " if has('nvim')
-  "   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  " else
-  "   Plug 'Shougo/deoplete.nvim'
-  "   Plug 'roxma/nvim-yarp'
-  "   Plug 'roxma/vim-hug-neovim-rpc'
-  " endif
+  Plug 'github/copilot.vim'
 
 call plug#end()
 
