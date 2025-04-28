@@ -50,23 +50,38 @@ RUN echo "source /root/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" >> /roo
 RUN echo "export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=cyan'" >> /root/.zshrc
 
 #######################
+# Install terminator
+#######################
+RUN apt-get install -y terminator
+COPY config/terminator/ /root/.config/terminator/
+
+
+#######################
 # Install nvim
 #######################
+RUN add-apt-repository ppa:neovim-ppa/unstable && apt-get update -y
 RUN apt-get install -y neovim python3-neovim
 RUN apt-get install -y nodejs npm
 RUN npm install -g n
 RUN n stable
 
-## Add vim config
-COPY config/init.vim /root/.config/nvim/init.vim
+## Add init.vim config
 
-## Install nvim Plug
-RUN curl -fLo /root/.vim/autoload/plug.vim --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+# COPY config/init.vim/ /root/.config/nvim/
+#
+# RUN curl -fLo /root/.vim/autoload/plug.vim --create-dirs \
+#     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+#
+# RUN nvim --headless +PlugInstall +qall
+#
+# RUN mv /usr/bin/vi /usr/bin/vi.bak && ln -s /usr/bin/nvim /usr/bin/vi
 
-RUN nvim --headless +PlugInstall +qall
 
-RUN mv /usr/bin/vi /usr/bin/vi.bak && ln -s /usr/bin/nvim /usr/bin/vi
+## Add init.lua config
+COPY config/init.lua/ /root/.config/nvim/
+
+RUN echo "alias vim=nvim" >> ~/.zshrc
+RUN echo "alias vi=vim" >> ~/.zshrc
 
 #######################
 # Install from tmux

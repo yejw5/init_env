@@ -4,7 +4,9 @@ set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 
 call plug#begin('~/.vim/plugged')
+  Plug 'tpope/vim-fugitive'
   Plug 'vim-airline/vim-airline'
+
   Plug 'scrooloose/nerdtree'
   Plug 'vim-syntastic/syntastic'
 
@@ -23,10 +25,22 @@ call plug#begin('~/.vim/plugged')
 
   Plug 'github/copilot.vim'
 
+  Plug 'zivyangll/git-blame.vim'
+
+  " 参考：https://github.com/ribru17/bamboo.nvim
+  Plug 'ribru17/bamboo.nvim'
+
 call plug#end()
 
-" deoplete
-" let g:deoplete#enable_at_startup = 1
+let g:bamboo_config = {
+  \ 'style': 'multiplex',
+  \ 'ending_tildes': v:true,
+  \ 'diagnostics': {
+    \ 'darker': v:true,
+    \ 'background': v:false,
+  \ },
+\ }
+colorscheme bamboo
 
 " nerd tree
 "autocmd vimenter * NERDTree
@@ -71,3 +85,8 @@ augroup autoformat_settings
   autocmd FileType rust AutoFormatBuffer rustfmt
   autocmd FileType vue AutoFormatBuffer prettier
 augroup END
+
+let mapleader = ","  " map leader键设置
+nnoremap <Leader>s :<C-u>call gitblame#echo()<CR>
+
+set mouse=a
